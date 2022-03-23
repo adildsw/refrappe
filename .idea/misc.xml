@@ -9,12 +9,21 @@
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/drawable/ic_menu_camera.xml" value="0.3165" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/drawable/ic_menu_gallery.xml" value="0.3165" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/drawable/ic_menu_slideshow.xml" value="0.3165" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/drawable/shape_round_corner.xml" value="0.522" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/drawable/side_nav_bar.xml" value="0.3165" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/drawable/util_divider.xml" value="0.3165" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/drawable/util_divider_24.xml" value="0.3165" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/activity_frappe_main.xml" value="0.3319746376811594" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/activity_main.xml" value="0.5" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/app_bar_frappe_main.xml" value="0.5541666666666667" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/app_bar_main.xml" value="2.2936046511627906" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_activity.xml" value="0.5541666666666667" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_button.xml" value="0.31354166666666666" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_checkbox.xml" value="0.5541666666666667" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_dropdown.xml" value="0.31354166666666666" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_input.xml" value="0.1" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_radio.xml" value="0.5541666666666667" />
+        <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_radio_option.xml" value="0.5541666666666667" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_section.xml" value="0.4691358024691358" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/component_text.xml" value="0.5541666666666667" />
         <entry key="..\:/Users/AdilGE66/Workspace/frappe/frappe/app/src/main/res/layout/content_frappe_main.xml" value="0.5541666666666667" />

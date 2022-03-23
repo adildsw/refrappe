@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="24dp"
-    android:layout_marginTop="24dp"
-    android:backgroundTint="#AB212D"
+    android:backgroundTint="#EEEEEE"
     app:cardCornerRadius="8dp">
 
     <LinearLayout
@@ -30,16 +29,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Subtitle"
+            android:alpha="0.4"
             android:textSize="16sp"
             android:textColor="#000000"
-            android:fontFamily="sans-serif" />
+            android:fontFamily="sans-serif-medium" />
 
         <LinearLayout
             android:id="@+id/sectionContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:showDividers="middle"
+            android:divider="@drawable/util_divider" />
 
     </LinearLayout>
 

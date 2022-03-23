@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ActivityComponent;
@@ -18,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -41,11 +44,15 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Window w = getWindow();
+        w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+
         binding = ActivityFrappeMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         DrawerLayout drawer = binding.drawerLayout;
-        drawer.open();
+        drawer.close();
 
         navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);

@@ -29,6 +29,7 @@ public class TextComponentInflater {
     public View inflate() {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.component_text, viewGroup, false);
+        ((TextView) view.findViewById(R.id.text)).setTag(component.getId());
 
         // Text
         ((TextView) view.findViewById(R.id.text)).setText(component.getText());

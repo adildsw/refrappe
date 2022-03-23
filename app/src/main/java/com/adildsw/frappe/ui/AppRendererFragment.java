@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.adildsw.frappe.R;
@@ -19,6 +20,7 @@ import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ActivityComponent;
 import com.adildsw.frappe.models.components.SectionComponent;
 import com.adildsw.frappe.models.components.UIComponent;
+import com.adildsw.frappe.ui.components.ActivityComponentInflater;
 import com.adildsw.frappe.ui.components.SectionComponentInflater;
 
 import org.json.JSONException;
@@ -28,6 +30,11 @@ public class AppRendererFragment extends Fragment {
 
     private final AppModel app;
     private final ActivityComponent activity;
+
+    public AppRendererFragment(AppModel app) {
+        this.app = app;
+        this.activity = (ActivityComponent) app.getComponentById("main-activity");
+    }
 
     public AppRendererFragment(AppModel app, ActivityComponent activity) {
         this.app = app;
@@ -48,24 +55,19 @@ public class AppRendererFragment extends Fragment {
     }
 
     private View appRenderer(View view, ViewGroup viewGroup) {
-        for (int i = 0; i < activity.getChildren().length; i++) {
-            UIComponent child = app.getComponentById(activity.getChildren()[i]);
+        View activityView = new ActivityComponentInflater(
+                app,
+                activity,
+                getContext(),
+                viewGroup
+        ).inflate();
 
-            // Section Component
-            if (child.getType().equals("enfrappe-ui-section")) {
-                View sectionView = new SectionComponentInflater(
-                        app,
-                        (SectionComponent) child,
-                        getContext(),
-                        viewGroup
-                ).inflate();
-                ((LinearLayout) view.findViewById(R.id.fragmentContent)).addView(sectionView);
-            }
-
-            // Other root components go here...
-
-        }
+        addView(view, activityView);
 
         return view;
+    }
+
+    private void addView(View parent, View child) {
+        ((ScrollView) parent).addView(child);
     }
 }

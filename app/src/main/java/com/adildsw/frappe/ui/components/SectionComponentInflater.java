@@ -12,6 +12,11 @@ import androidx.cardview.widget.CardView;
 
 import com.adildsw.frappe.R;
 import com.adildsw.frappe.models.AppModel;
+import com.adildsw.frappe.models.components.ButtonComponent;
+import com.adildsw.frappe.models.components.CheckboxComponent;
+import com.adildsw.frappe.models.components.DropdownComponent;
+import com.adildsw.frappe.models.components.InputComponent;
+import com.adildsw.frappe.models.components.RadioComponent;
 import com.adildsw.frappe.models.components.SectionComponent;
 import com.adildsw.frappe.models.components.TextComponent;
 import com.adildsw.frappe.models.components.UIComponent;
@@ -36,6 +41,7 @@ public class SectionComponentInflater {
     public View inflate() {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.component_section, viewGroup, false);
+        ((CardView) view.findViewById(R.id.section)).setTag(component.getId());
 
         // Background
         ((CardView) view.findViewById(R.id.section))
@@ -64,6 +70,61 @@ public class SectionComponentInflater {
                         viewGroup
                 ).inflate();
                 addView(view, textView);
+            }
+
+            // Button Component
+            if (child.getType().equals("enfrappe-ui-button")) {
+                View buttonView = new ButtonComponentInflater(
+                        app,
+                        (ButtonComponent) child,
+                        context,
+                        viewGroup
+                ).inflate();
+                addView(view, buttonView);
+            }
+
+            // Input Component
+            if (child.getType().equals("enfrappe-ui-input")) {
+                View inputView = new InputComponentInflater(
+                        app,
+                        (InputComponent) child,
+                        context,
+                        viewGroup
+                ).inflate();
+                addView(view, inputView);
+            }
+
+            // Checkbox Component
+            if (child.getType().equals("enfrappe-ui-checkbox")) {
+                View checkboxView = new CheckboxComponentInflater(
+                        app,
+                        (CheckboxComponent) child,
+                        context,
+                        viewGroup
+                ).inflate();
+                addView(view, checkboxView);
+            }
+
+            // Radio Component
+            if (child.getType().equals("enfrappe-ui-radio")) {
+                View radioView = new RadioComponentInflater(
+                        app,
+                        (RadioComponent) child,
+                        context,
+                        viewGroup
+                ).inflate();
+                addView(view, radioView);
+            }
+
+            // Dropdown Component
+            if (child.getType().equals("enfrappe-ui-dropdown")) {
+                View dropdownView = new DropdownComponentInflater(
+                        app,
+                        (DropdownComponent) child,
+                        context,
+                        viewGroup
+                ).inflate();
+                addView(view, dropdownView);
             }
 
             // Other sub components go here...
