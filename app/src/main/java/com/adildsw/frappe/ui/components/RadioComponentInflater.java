@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -14,6 +15,7 @@ import com.adildsw.frappe.R;
 import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ButtonComponent;
 import com.adildsw.frappe.models.components.RadioComponent;
+import com.adildsw.frappe.utils.LiveData;
 import com.adildsw.frappe.utils.Utils;
 
 import org.json.JSONObject;
@@ -24,8 +26,10 @@ public class RadioComponentInflater {
     Context context;
     ViewGroup viewGroup;
 
-    public RadioComponentInflater(AppModel app, RadioComponent component, Context context,
-                                   ViewGroup viewGroup) {
+    LiveData liveData = LiveData.getInstance();
+
+    public RadioComponentInflater(AppModel app, RadioComponent component, ViewGroup viewGroup,
+                                  Context context) {
         this.app = app;
         this.component = component;
         this.context = context;
@@ -43,6 +47,7 @@ public class RadioComponentInflater {
                 .setTextColor(Utils.parseColorStateList(component.getTextColor()));
 
         // Options
+        String initValue = "";
         for (int i = 0; i < component.getOptions().length(); i++) {
             String optionId = component.getOptionIds()[i];
             try {
@@ -54,18 +59,22 @@ public class RadioComponentInflater {
                 radioButton.setTextColor(Utils.parseColorStateList(component.getTextColor()));
                 if (i == 0) {
                     radioButton.setChecked(true);
+                    initValue = option.getString("value");
                 }
-                addView(view.findViewById(R.id.radio), radioButton);
+                ((RadioGroup) view.findViewById(R.id.radio)).addView(radioButton);
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        return view;
-    }
+        // Update Live Data
+        liveData.set(component.getId(), component.getName(), initValue);
+        ((RadioGroup) view.findViewById(R.id.radio)).setOnCheckedChangeListener((radioGroup, i) -> {
+            RadioButton radioButton = (RadioButton) radioGroup.findViewById(i);
+            liveData.set(component.getId(), component.getName(), radioButton.getTag().toString());
+        });
 
-    private void addView(View parent, View child) {
-        ((RadioGroup) parent).addView(child);
+        return view;
     }
 }

@@ -17,8 +17,13 @@ public class RadioComponent implements UIComponent{
         this.label = label;
         this.textColor = textColor;
         this.parent = parent;
-        this.optionIds = optionIds;
         this.options = options;
+        if (optionIds.length == 1 && optionIds[0].equals("")) {
+            this.optionIds = new String[0];
+        }
+        else {
+            this.optionIds = optionIds;
+        }
     }
 
     public RadioComponent(JSONObject data) throws JSONException {

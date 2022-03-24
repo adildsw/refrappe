@@ -6,15 +6,15 @@ import org.json.JSONObject;
 import java.util.Arrays;
 
 public class ButtonComponent implements UIComponent {
-    private final String id, text, background, textColor, parent, onPressActionType, onPressActivity, onPressAPIResultDisplayType, onPressAPICallType, onPressAPIURL;
-    private final String[] onPressAPIParams;
-    private final JSONObject onPressAPICustomParams;
+    private final String id, text, background, textColor, parent, onPressActionType, onPressActivity, onPressApiResultDisplayType, onPressApiCallType, onPressApiUrl;
+    private final String[] onPressApiParams;
+    private final JSONObject onPressApiCustomParams;
 
     public ButtonComponent(String id, String text, String background, String textColor, String parent,
                          String onPressActionType, String onPressActivity,
-                         String onPressAPIResultDisplayType, String onPressAPICallType,
-                         String onPressAPIURL, String[] onPressAPIParams,
-                         JSONObject onPressAPICustomParams) {
+                         String onPressApiResultDisplayType, String onPressApiCallType,
+                         String onPressApiUrl, String[] onPressApiParams,
+                         JSONObject onPressApiCustomParams) {
         this.id = id;
         this.text = text;
         this.background = background;
@@ -22,11 +22,16 @@ public class ButtonComponent implements UIComponent {
         this.parent = parent;
         this.onPressActionType = onPressActionType;
         this.onPressActivity = onPressActivity;
-        this.onPressAPIResultDisplayType = onPressAPIResultDisplayType;
-        this.onPressAPICallType = onPressAPICallType;
-        this.onPressAPIURL = onPressAPIURL;
-        this.onPressAPIParams = onPressAPIParams;
-        this.onPressAPICustomParams = onPressAPICustomParams;
+        this.onPressApiResultDisplayType = onPressApiResultDisplayType;
+        this.onPressApiCallType = onPressApiCallType;
+        this.onPressApiUrl = onPressApiUrl;
+        this.onPressApiCustomParams = onPressApiCustomParams;
+        if (onPressApiParams.length == 1 && onPressApiParams[0].equals("")) {
+            this.onPressApiParams = new String[0];
+        }
+        else {
+            this.onPressApiParams = onPressApiParams;
+        }
     }
 
     public ButtonComponent(JSONObject data) throws JSONException {
@@ -90,24 +95,24 @@ public class ButtonComponent implements UIComponent {
         return onPressActivity;
     }
 
-    public String getOnPressAPIResultDisplayType() {
-        return onPressAPIResultDisplayType;
+    public String getOnPressApiResultDisplayType() {
+        return onPressApiResultDisplayType;
     }
 
-    public String getOnPressAPICallType() {
-        return onPressAPICallType;
+    public String getOnPressApiCallType() {
+        return onPressApiCallType;
     }
 
-    public String getOnPressAPIURL() {
-        return onPressAPIURL;
+    public String getOnPressApiUrl() {
+        return onPressApiUrl;
     }
 
-    public String[] getOnPressAPIParams() {
-        return onPressAPIParams;
+    public String[] getOnPressApiParams() {
+        return onPressApiParams;
     }
 
-    public JSONObject getOnPressAPICustomParams() {
-        return onPressAPICustomParams;
+    public JSONObject getOnPressApiCustomParams() {
+        return onPressApiCustomParams;
     }
 
     @Override
@@ -120,11 +125,11 @@ public class ButtonComponent implements UIComponent {
                 ", parent='" + parent + '\'' +
                 ", onPressActionType='" + onPressActionType + '\'' +
                 ", onPressActivity='" + onPressActivity + '\'' +
-                ", onPressAPIResultDisplayType='" + onPressAPIResultDisplayType + '\'' +
-                ", onPressAPICallType='" + onPressAPICallType + '\'' +
-                ", onPressAPIURL='" + onPressAPIURL + '\'' +
-                ", onPressAPIParams=" + Arrays.toString(onPressAPIParams) +
-                ", onPressAPICustomParams=" + onPressAPICustomParams +
+                ", onPressApiResultDisplayType='" + onPressApiResultDisplayType + '\'' +
+                ", onPressApiCallType='" + onPressApiCallType + '\'' +
+                ", onPressApiUrl='" + onPressApiUrl + '\'' +
+                ", onPressApiParams=" + Arrays.toString(onPressApiParams) +
+                ", onPressApiCustomParams=" + onPressApiCustomParams +
                 '}';
     }
 }

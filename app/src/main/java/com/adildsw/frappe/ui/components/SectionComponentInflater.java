@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentActivity;
 
 import com.adildsw.frappe.R;
 import com.adildsw.frappe.models.AppModel;
@@ -29,13 +30,15 @@ public class SectionComponentInflater {
     SectionComponent component;
     Context context;
     ViewGroup viewGroup;
+    FragmentActivity activity;
 
-    public SectionComponentInflater(AppModel app, SectionComponent component, Context context,
-                                    ViewGroup viewGroup) {
+    public SectionComponentInflater(AppModel app, SectionComponent component, ViewGroup viewGroup,
+                                    Context context, FragmentActivity activity) {
         this.app = app;
         this.component = component;
         this.context = context;
         this.viewGroup = viewGroup;
+        this.activity = activity;
     }
 
     public View inflate() {
@@ -66,8 +69,8 @@ public class SectionComponentInflater {
                 View textView = new TextComponentInflater(
                         app,
                         (TextComponent) child,
-                        context,
-                        viewGroup
+                        viewGroup,
+                        context
                 ).inflate();
                 addView(view, textView);
             }
@@ -77,8 +80,9 @@ public class SectionComponentInflater {
                 View buttonView = new ButtonComponentInflater(
                         app,
                         (ButtonComponent) child,
+                        viewGroup,
                         context,
-                        viewGroup
+                        activity
                 ).inflate();
                 addView(view, buttonView);
             }
@@ -88,8 +92,8 @@ public class SectionComponentInflater {
                 View inputView = new InputComponentInflater(
                         app,
                         (InputComponent) child,
-                        context,
-                        viewGroup
+                        viewGroup,
+                        context
                 ).inflate();
                 addView(view, inputView);
             }
@@ -99,8 +103,8 @@ public class SectionComponentInflater {
                 View checkboxView = new CheckboxComponentInflater(
                         app,
                         (CheckboxComponent) child,
-                        context,
-                        viewGroup
+                        viewGroup,
+                        context
                 ).inflate();
                 addView(view, checkboxView);
             }
@@ -110,8 +114,8 @@ public class SectionComponentInflater {
                 View radioView = new RadioComponentInflater(
                         app,
                         (RadioComponent) child,
-                        context,
-                        viewGroup
+                        viewGroup,
+                        context
                 ).inflate();
                 addView(view, radioView);
             }
@@ -121,8 +125,8 @@ public class SectionComponentInflater {
                 View dropdownView = new DropdownComponentInflater(
                         app,
                         (DropdownComponent) child,
-                        context,
-                        viewGroup
+                        viewGroup,
+                        context
                 ).inflate();
                 addView(view, dropdownView);
             }

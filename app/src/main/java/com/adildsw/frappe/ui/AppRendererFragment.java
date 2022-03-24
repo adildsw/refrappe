@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
@@ -29,16 +30,21 @@ import org.json.JSONObject;
 public class AppRendererFragment extends Fragment {
 
     private final AppModel app;
-    private final ActivityComponent activity;
+    private final ActivityComponent activityComponent;
 
     public AppRendererFragment(AppModel app) {
         this.app = app;
-        this.activity = (ActivityComponent) app.getComponentById("main-activity");
+        this.activityComponent = (ActivityComponent) app.getComponentById("main-activity");
+    }
+
+    public AppRendererFragment(AppModel app, String activityId) {
+        this.app = app;
+        this.activityComponent = (ActivityComponent) app.getComponentById(activityId);
     }
 
     public AppRendererFragment(AppModel app, ActivityComponent activity) {
         this.app = app;
-        this.activity = activity;
+        this.activityComponent = activity;
     }
 
     @Override
@@ -50,24 +56,21 @@ public class AppRendererFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_app_renderer, container, false);
-        view = appRenderer(view, container);
+        if (activityComponent != null) {
+            appRenderer(view, container);
+        }
         return view;
     }
 
-    private View appRenderer(View view, ViewGroup viewGroup) {
+    private void appRenderer(View view, ViewGroup viewGroup) {
         View activityView = new ActivityComponentInflater(
                 app,
-                activity,
+                activityComponent,
+                viewGroup,
                 getContext(),
-                viewGroup
+                getActivity()
         ).inflate();
-
-        addView(view, activityView);
-
-        return view;
+        ((ScrollView) view).addView(activityView);
     }
 
-    private void addView(View parent, View child) {
-        ((ScrollView) parent).addView(child);
-    }
 }

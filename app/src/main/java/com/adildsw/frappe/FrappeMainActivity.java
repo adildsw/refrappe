@@ -1,9 +1,8 @@
 package com.adildsw.frappe;
 
 import static android.util.Log.ASSERT;
-import static com.adildsw.frappe.utils.DataUtils.decompressString;
-import static com.adildsw.frappe.utils.DataUtils.test;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -11,6 +10,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ActivityComponent;
@@ -47,12 +47,30 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
         Window w = getWindow();
         w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
-
         binding = ActivityFrappeMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         DrawerLayout drawer = binding.drawerLayout;
         drawer.close();
+
+        Uri data = getIntent().getData();
+        if (data != null) {
+            String dlData = data.toString().substring(29);
+            String appId = dlData.split("_")[0];
+            int currentPacket = Integer.parseInt(dlData.split("_")[1]);
+            int totalPacket = Integer.parseInt(dlData.split("_")[2]);
+            int dataLength = Integer.parseInt(dlData.split("_")[3]);
+            String dataString = dlData.split("_")[4];
+            Toast.makeText(this, data.toString(), Toast.LENGTH_SHORT).show();
+            getWindow().getDecorView().post(() -> {
+                try {
+                    AppModel app = new AppModel(DataUtils.decompressString(dataString, dataLength));
+                    renderApp(app);
+                } catch (JSONException e) {
+                    Log.e("FrappeMainActivity", "Error while decompressing data", e);
+                }
+            });
+        }
 
         navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);
@@ -60,15 +78,22 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
         Menu menu = navigationView.getMenu();
         menu.add(R.id.mainGroup, 35, Menu.NONE, "abc");
 
-        Fragment fragment = null;
-        try {
-            AppModel app = DataUtils.sampleApp();
-            ActivityComponent mainActivity = (ActivityComponent) app.getComponentById("main-activity");
-            fragment = new AppRendererFragment(DataUtils.sampleApp(), mainActivity);
-            loadFragment(fragment);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        AppModel app = DataUtils.sampleApp();
+        if (app != null) {
+            renderApp(app);
         }
+    }
+
+    public void renderApp(AppModel app) {
+        loadFragment(new AppRendererFragment(app));
+    }
+
+    public void renderApp(AppModel app, String activityId) {
+        loadFragment(new AppRendererFragment(app, activityId));
+    }
+
+    public void renderApp(AppModel app, ActivityComponent activity) {
+        loadFragment(new AppRendererFragment(app, activity));
     }
 
     @Override

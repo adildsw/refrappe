@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.fragment.app.FragmentActivity;
+
 import com.adildsw.frappe.R;
 import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ActivityComponent;
@@ -20,13 +22,15 @@ public class ActivityComponentInflater {
     ActivityComponent component;
     Context context;
     ViewGroup viewGroup;
+    FragmentActivity activity;
 
-    public ActivityComponentInflater(AppModel app, ActivityComponent component, Context context,
-                                     ViewGroup viewGroup) {
+    public ActivityComponentInflater(AppModel app, ActivityComponent component, ViewGroup viewGroup,
+                                     Context context, FragmentActivity activity) {
         this.app = app;
         this.component = component;
         this.context = context;
         this.viewGroup = viewGroup;
+        this.activity = activity;
     }
 
     public View inflate() {
@@ -47,10 +51,11 @@ public class ActivityComponentInflater {
                 View sectionView = new SectionComponentInflater(
                         app,
                         (SectionComponent) child,
+                        viewGroup,
                         context,
-                        viewGroup
+                        activity
                 ).inflate();
-                addView(view, sectionView);
+                ((LinearLayout) view).addView(sectionView);
             }
 
             // Other root components go here...
@@ -58,9 +63,5 @@ public class ActivityComponentInflater {
         }
 
         return view;
-    }
-
-    private void addView(View parent, View child) {
-        ((LinearLayout) parent).addView(child);
     }
 }

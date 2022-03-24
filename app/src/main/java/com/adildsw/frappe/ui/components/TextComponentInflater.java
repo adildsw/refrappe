@@ -18,8 +18,8 @@ public class TextComponentInflater {
     Context context;
     ViewGroup viewGroup;
 
-    public TextComponentInflater(AppModel app, TextComponent component, Context context,
-                                    ViewGroup viewGroup) {
+    public TextComponentInflater(AppModel app, TextComponent component, ViewGroup viewGroup,
+                                 Context context) {
         this.app = app;
         this.component = component;
         this.context = context;
