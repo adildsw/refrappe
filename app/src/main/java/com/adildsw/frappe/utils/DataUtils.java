@@ -1,8 +1,11 @@
 package com.adildsw.frappe.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.adildsw.frappe.models.AppModel;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 
@@ -10,6 +13,44 @@ import java.util.Base64;
 import java.util.zip.Inflater;
 
 public class DataUtils {
+
+    public static String saveAppFromDeepLink(String data, Context context) {
+        String dlData = data.toString().substring(29);
+        String appId = dlData.split("_")[0];
+        int currentPacket = Integer.parseInt(dlData.split("_")[1]);
+        int totalPacket = Integer.parseInt(dlData.split("_")[2]);
+        int dataLength = Integer.parseInt(dlData.split("_")[3]);
+        String dataString = dlData.split("_")[4];
+
+        AppModel app;
+        try {
+            app = new AppModel(DataUtils.decompressString(dataString, dataLength));
+        } catch (JSONException e) {
+            Log.e("FrappeMainActivity", "Error while decompressing data", e);
+            return null;
+        }
+
+        if (totalPacket == 1) {
+            DataUtils.saveApp(app, context);
+            return appId;
+        }
+
+        return null;
+    }
+
+    private static void saveApp(AppModel app, Context context) {
+        Gson gson = new Gson();
+        String data = gson.toJson(app);
+        SharedPreferences sPref = context.getSharedPreferences("apps", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sPref.edit();
+        editor.putString(app.getAppId(), data);
+        editor.apply();
+    }
+
+    private static void saveAppPacket(String appId, int currentPacket, int totalPacket, String data, Context context) {
+        SharedPreferences sPref = context.getSharedPreferences("apps", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sPref.edit();
+    }
 
     public static String decompressString(String data, int length) {
         try {
@@ -26,24 +67,6 @@ public class DataUtils {
             Log.e("MainActivity", "Error decoding string", e);
             return null;
         }
-    }
-
-    public static String getProcessedUrl(String address, String port, String api) {
-        String url = address;
-
-        if (!url.startsWith("http")) {
-            url = "http://" + url;
-        }
-        if (url.endsWith(":")) {
-            url = url.substring(0, url.length() - 1);
-        }
-        url = url + ":" + port;
-        if (url.endsWith("/")) {
-            url = url.substring(0, url.length() - 1);
-        }
-        url = url + api;
-
-        return url;
     }
 
     public static AppModel sampleApp() {

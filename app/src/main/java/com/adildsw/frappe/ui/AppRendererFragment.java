@@ -2,6 +2,7 @@ package com.adildsw.frappe.ui;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -71,6 +72,10 @@ public class AppRendererFragment extends Fragment {
                 getActivity()
         ).inflate();
         ((ScrollView) view).addView(activityView);
+
+        // Coloring Extended Background
+        ColorDrawable colorDrawable = (ColorDrawable) activityView.findViewById(R.id.activity).getBackground();
+        ((ScrollView) view.findViewById(R.id.fragmentContent)).setBackgroundColor(colorDrawable.getColor());
     }
 
 }

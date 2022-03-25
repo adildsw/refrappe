@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:showDividers="beginning|middle|end"
     android:divider="@drawable/util_divider_24"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
 </LinearLayout>

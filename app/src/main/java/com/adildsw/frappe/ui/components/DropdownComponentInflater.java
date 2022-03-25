@@ -41,7 +41,7 @@ public class DropdownComponentInflater {
     public View inflate() {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.component_dropdown, viewGroup, false);
-        ((AutoCompleteTextView) view.findViewById(R.id.dropdown)).setTag(component.getId());
+        view.findViewById(R.id.dropdown).setTag(component.getId());
 
         // Options
         String[] options = new String[component.getOptions().length()];
@@ -57,7 +57,7 @@ public class DropdownComponentInflater {
                 e.printStackTrace();
             }
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter(
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 context,
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
                 options

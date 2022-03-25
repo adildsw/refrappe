@@ -152,6 +152,17 @@ public class AppModel {
         return null;
     }
 
+    public String getActivityIdByName(String name) {
+        for (int i = 0; i < components.size(); i++) {
+            if (components.get(i).getType().equals("enfrappe-ui-activity")) {
+                if (((ActivityComponent) components.get(i)).getName().equals(name)) {
+                    return components.get(i).getId();
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "AppModel{" +

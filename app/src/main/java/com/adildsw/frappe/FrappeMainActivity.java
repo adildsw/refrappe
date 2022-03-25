@@ -2,30 +2,24 @@ package com.adildsw.frappe;
 
 import static android.util.Log.ASSERT;
 
+import android.Manifest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Menu;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Toast;
+import android.view.View;
 
 import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ActivityComponent;
 import com.adildsw.frappe.ui.AppRendererFragment;
+import com.adildsw.frappe.ui.QrScannerFragment;
+import com.adildsw.frappe.ui.HomeFragment;
 import com.adildsw.frappe.utils.DataUtils;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -33,10 +27,13 @@ import com.adildsw.frappe.databinding.ActivityFrappeMainBinding;
 
 import org.json.JSONException;
 
+import pub.devrel.easypermissions.EasyPermissions;
+
 public class FrappeMainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private AppBarConfiguration mAppBarConfiguration;
     private ActivityFrappeMainBinding binding;
+
+    public static final String[] PERMISSIONS = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.CAMERA };
 
     NavigationView navigationView;
 
@@ -44,14 +41,14 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Window w = getWindow();
-        w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        if (!EasyPermissions.hasPermissions(this, PERMISSIONS)) {
+            EasyPermissions.requestPermissions(this, "Please grant permissions", 1, PERMISSIONS);
+        }
 
         binding = ActivityFrappeMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        DrawerLayout drawer = binding.drawerLayout;
-        drawer.close();
+        toggleDrawer(false);
 
         Uri data = getIntent().getData();
         if (data != null) {
@@ -61,7 +58,6 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
             int totalPacket = Integer.parseInt(dlData.split("_")[2]);
             int dataLength = Integer.parseInt(dlData.split("_")[3]);
             String dataString = dlData.split("_")[4];
-            Toast.makeText(this, data.toString(), Toast.LENGTH_SHORT).show();
             getWindow().getDecorView().post(() -> {
                 try {
                     AppModel app = new AppModel(DataUtils.decompressString(dataString, dataLength));
@@ -76,12 +72,9 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
         navigationView.setNavigationItemSelectedListener(this);
 
         Menu menu = navigationView.getMenu();
-        menu.add(R.id.mainGroup, 35, Menu.NONE, "abc");
+        menu.add(R.id.appList, 35, Menu.NONE, "abc");
 
-        AppModel app = DataUtils.sampleApp();
-        if (app != null) {
-            renderApp(app);
-        }
+        loadHomeFragment();
     }
 
     public void renderApp(AppModel app) {
@@ -105,6 +98,7 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
 
     public boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
+            toggleDrawer(false);
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragmentContainer, fragment)
@@ -112,5 +106,34 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
             return true;
         }
         return false;
+    }
+
+    public void toggleDrawer(boolean open) {
+        DrawerLayout drawer = binding.drawerLayout;
+        if (open) {
+            drawer.open();
+        } else {
+            drawer.close();
+        }
+    }
+
+    private void loadHomeFragment() {
+        loadFragment(new HomeFragment());
+    }
+
+    private void loadQrScannerFragment() {
+        loadFragment(new QrScannerFragment());
+    }
+
+    public void loadQrScannerFragment(MenuItem item) {
+        loadQrScannerFragment();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 }

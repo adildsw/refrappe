@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bitmap_grid"
+    tools:context=".ui.HomeFragment">
+
+    <LinearLayout
+        android:id="@+id/rootCenterContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:divider="@drawable/util_divider"
+        android:showDividers="middle">
+
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:alpha="0.5"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:text="No Application Loaded"
+            android:textSize="20sp"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:alpha="0.5"
+            android:fontFamily="sans-serif-condensed-medium"/>
+
+    </LinearLayout>
+
+</FrameLayout>
