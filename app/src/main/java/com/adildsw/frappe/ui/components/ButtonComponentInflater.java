@@ -166,6 +166,7 @@ public class ButtonComponentInflater {
 
             // Making POST Call
             makePostRequest(url, params, callback);
+            Log.println(Log.ASSERT, "URL", url + "?" + params.toString());
         }
 
     }
