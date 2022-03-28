@@ -9,12 +9,14 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
 import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ActivityComponent;
 import com.adildsw.frappe.ui.AppRendererFragment;
 import com.adildsw.frappe.ui.QrScannerFragment;
 import com.adildsw.frappe.ui.HomeFragment;
+import com.adildsw.frappe.utils.AppMenuManager;
 import com.adildsw.frappe.utils.DataUtils;
 import com.google.android.material.navigation.NavigationView;
 
@@ -27,23 +29,19 @@ import com.adildsw.frappe.databinding.ActivityFrappeMainBinding;
 
 import org.json.JSONException;
 
+import java.util.Arrays;
+
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class FrappeMainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private ActivityFrappeMainBinding binding;
 
-    public static final String[] PERMISSIONS = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.CAMERA };
-
     NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (!EasyPermissions.hasPermissions(this, PERMISSIONS)) {
-            EasyPermissions.requestPermissions(this, "Please grant permissions", 1, PERMISSIONS);
-        }
 
         binding = ActivityFrappeMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -52,32 +50,39 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
 
         Uri data = getIntent().getData();
         if (data != null) {
-            String dlData = data.toString().substring(29);
-            String appId = dlData.split("_")[0];
-            int currentPacket = Integer.parseInt(dlData.split("_")[1]);
-            int totalPacket = Integer.parseInt(dlData.split("_")[2]);
-            int dataLength = Integer.parseInt(dlData.split("_")[3]);
-            String dataString = dlData.split("_")[4];
-            getWindow().getDecorView().post(() -> {
-                try {
-                    AppModel app = new AppModel(DataUtils.decompressString(dataString, dataLength));
-                    renderApp(app);
-                } catch (JSONException e) {
-                    Log.e("FrappeMainActivity", "Error while decompressing data", e);
-                }
-            });
+            String dlAppId = DataUtils.saveAppFromDeepLink(data.toString(), this);
+            if (dlAppId != null) {
+                AppModel app = DataUtils.loadApp(dlAppId, this);
+                getWindow().getDecorView().post(() -> renderApp(app));
+            }
         }
 
         navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);
 
         Menu menu = navigationView.getMenu();
-        menu.add(R.id.appList, 35, Menu.NONE, "abc");
-
+        String[] appList = DataUtils.getAllAppIds(this);
+        for (String appId : appList) {
+            String appName = DataUtils.getAppNameFromId(appId, this);
+            menu.add(R.id.appList, appId.hashCode(), Menu.NONE, appName);
+            MenuItem item = menu.findItem(appId.hashCode());
+            AppMenuManager.setMenuItemTag(item, appId);
+            item.setOnMenuItemClickListener(menuItem -> {
+                AppModel newApp = DataUtils
+                        .loadApp(AppMenuManager.getMenuItemTag(menuItem), this);
+                if (newApp != null) {
+                    renderApp(newApp);
+                    AppMenuManager.uncheckAllMenuItems();
+                    item.setChecked(true);
+                }
+                return true;
+            });
+        }
         loadHomeFragment();
     }
 
     public void renderApp(AppModel app) {
+        Toast.makeText(this, "Loading app...", Toast.LENGTH_SHORT).show();
         loadFragment(new AppRendererFragment(app));
     }
 
@@ -118,10 +123,16 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
     }
 
     private void loadHomeFragment() {
+        AppMenuManager.uncheckAllMenuItems();
         loadFragment(new HomeFragment());
     }
 
+    public void loadHomeFragment(MenuItem item) {
+        loadHomeFragment();
+    }
+
     private void loadQrScannerFragment() {
+        AppMenuManager.uncheckAllMenuItems();
         loadFragment(new QrScannerFragment());
     }
 
@@ -129,11 +140,18 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
         loadQrScannerFragment();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    private boolean isHome() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        return fragment instanceof HomeFragment;
+    }
 
-        // Forward results to EasyPermissions
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    @Override
+    public void onBackPressed() {
+        if (isHome()) {
+            super.onBackPressed();
+        }
+        else {
+            loadHomeFragment();
+        }
     }
 }

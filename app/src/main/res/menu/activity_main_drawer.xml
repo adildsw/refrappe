@@ -5,30 +5,21 @@
 
     <group
         android:id="@+id/appControls"
-        android:checkableBehavior="single">
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/homeBtn"
+            android:icon="@drawable/ic_home"
+            android:title="Home"
+            android:onClick="loadHomeFragment" />
         <item
             android:id="@+id/scanQrBtn"
             android:icon="@drawable/ic_qrcodescanner"
             android:title="Scan QR Code"
             android:onClick="loadQrScannerFragment"/>
-        <item
-            android:id="@+id/unloadAppBtn"
-            android:icon="@drawable/ic_unload"
-            android:title="Unload Application"
-            android:enabled="false" />
     </group>
 
     <group
         android:id="@+id/appList"
         android:checkableBehavior="single">
-        <item
-            android:id="@+id/asd"
-            android:title="@string/menu_home" />
-        <item
-            android:id="@+id/zxc"
-            android:title="@string/menu_gallery" />
-        <item
-            android:id="@+id/ddfg"
-            android:title="@string/menu_slideshow" />
     </group>
 </menu>

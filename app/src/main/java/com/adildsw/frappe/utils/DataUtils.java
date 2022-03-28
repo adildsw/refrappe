@@ -2,84 +2,150 @@ package com.adildsw.frappe.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.adildsw.frappe.models.AppModel;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
 
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.zip.Inflater;
 
 public class DataUtils {
 
     public static String saveAppFromDeepLink(String data, Context context) {
-        String dlData = data.toString().substring(29);
-        String appId = dlData.split("_")[0];
-        int currentPacket = Integer.parseInt(dlData.split("_")[1]);
-        int totalPacket = Integer.parseInt(dlData.split("_")[2]);
-        int dataLength = Integer.parseInt(dlData.split("_")[3]);
-        String dataString = dlData.split("_")[4];
+        if (data != null) {
+            Log.println(Log.ASSERT, "FrappeMainActivity", "Data: " + data.toString());
+            String dlData = data.replace("http://frappe.com/load?data=", "");
+            String appId = dlData.split("_")[0];
+            int currentPacket = Integer.parseInt(dlData.split("_")[1]);
+            int totalPacket = Integer.parseInt(dlData.split("_")[2]);
+            int dataLength = Integer.parseInt(dlData.split("_")[3]);
+            String dataString = dlData.split("_")[4];
+            String decompressedData = Utils.decompressString(dataString, dataLength);
 
-        AppModel app;
-        try {
-            app = new AppModel(DataUtils.decompressString(dataString, dataLength));
-        } catch (JSONException e) {
-            Log.e("FrappeMainActivity", "Error while decompressing data", e);
-            return null;
+            AppModel app;
+            try {
+                app = new AppModel(decompressedData);
+            } catch (JSONException e) {
+                Log.e("FrappeMainActivity", "Error while decompressing data", e);
+                return null;
+            }
+
+            if (totalPacket == 1) {
+                DataUtils.saveApp(app.getAppId(), app.getAppName(), decompressedData, context);
+                return appId;
+            }
         }
-
-        if (totalPacket == 1) {
-            DataUtils.saveApp(app, context);
-            return appId;
-        }
-
         return null;
     }
 
-    private static void saveApp(AppModel app, Context context) {
-        Gson gson = new Gson();
-        String data = gson.toJson(app);
+    public static void clearStoredData(Context context) {
         SharedPreferences sPref = context.getSharedPreferences("apps", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sPref.edit();
-        editor.putString(app.getAppId(), data);
-        editor.apply();
+        sPref.edit().clear().commit();
+
+        SharedPreferences sPref2 = context.getSharedPreferences("appNames", Context.MODE_PRIVATE);
+        sPref2.edit().clear().commit();
     }
 
-    private static void saveAppPacket(String appId, int currentPacket, int totalPacket, String data, Context context) {
+    private static void saveApp(String appId, String appName, String apps, Context context) {
         SharedPreferences sPref = context.getSharedPreferences("apps", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sPref.edit();
+        editor.putString(appId, apps);
+        editor.commit();
+
+        SharedPreferences sPref2 = context.getSharedPreferences("appNames", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = sPref2.edit();
+        editor2.putString(appId, appName);
+        Log.println(Log.ASSERT, "FrappeMainActivity", "Saving app: " + appId + " " + appName);
+        editor2.commit();
     }
 
-    public static String decompressString(String data, int length) {
-        try {
-            byte[] decodedString = Base64.getDecoder().decode(data.getBytes("UTF-8"));
-            Inflater inflater = new Inflater();
-            inflater.setInput(decodedString);
-            byte[] result = new byte[length];
-            int resultLength = inflater.inflate(result);
-            inflater.end();
-            Log.println(Log.ASSERT, "decompressed", new String(result, 0, resultLength));
-            return new String(result, 0, resultLength, "UTF-8");
+    private static boolean saveAppPacket(String appId, int currentPacket, int totalPacket, String data, Context context) {
+        SharedPreferences sPref = context.getSharedPreferences("appPackets", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sPref.edit();
+        editor.putString(appId + "_" + currentPacket + "_" + totalPacket, data);
+        editor.commit();
+
+        String[] packets = new String[totalPacket];
+        Arrays.fill(packets, "");
+
+        String[] appPackets = sPref.getAll().keySet().toArray(new String[0]);
+        for (String appPacket : appPackets) {
+            if (appPacket.startsWith(appId)) {
+                int packet = Integer.parseInt(appPacket.split("_")[1]);
+                packets[packet - 1] = sPref.getString(appPacket, "");
+            }
         }
-        catch (Exception e) {
-            Log.e("MainActivity", "Error decoding string", e);
+
+        for (String packet : packets) {
+            if (packet.equals("")) {
+                return false;
+            }
+        }
+
+        StringBuilder combinedAppData = new StringBuilder();
+        for (String packet : packets) {
+            combinedAppData.append(packet);
+        }
+//        sPref = context.getSharedPreferences("apps", Context.MODE_PRIVATE);
+//        editor = sPref.edit();
+//        editor.putString(appId, combinedAppData.toString());
+//        editor.commit();
+
+        return true;
+    }
+
+    public static boolean doesPacketExist(String rawData, Context context) {
+        rawData = rawData.replace("http://frappe.com/load?data=", "");
+        String appId = rawData.split("_")[0];
+        int currentPacket = Integer.parseInt(rawData.split("_")[1]);
+
+        SharedPreferences sPref = context.getSharedPreferences("appPackets", Context.MODE_PRIVATE);
+        String[] appPackets = sPref.getAll().keySet().toArray(new String[0]);
+        for (String appPacket : appPackets) {
+            if (appPacket.startsWith(appId)) {
+                int packet = Integer.parseInt(appPacket.split("_")[1]);
+                if (packet == currentPacket) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static AppModel loadApp(String appId, Context context) {
+        SharedPreferences sPref = context.getSharedPreferences("apps", Context.MODE_PRIVATE);
+        String data = sPref.getString(appId, "");
+        if (data == null) {
             return null;
         }
-    }
-
-    public static AppModel sampleApp() {
+        AppModel app;
         try {
-//            String compressed = "eJy1Vk2P2yAQ/SvIPewlTkM+nb0lq20v222lrtRDtQdiSIKCwQW8abTKf+8AsWMnjjartkgxZuZ5ePOAIa8RyfOYEkui21f/zml0G6Uq62asu9RgYfCLOt4nScbA+2WHZltmVMbQJ49AswrywrThSgIKd3vdHlgNlyvB4sLAp0siDOtEQqXEAioWXG4YrexSWb7cOaiubPAOMWNCqWbGuLj9iYvcxVHlzJW2zpP0BmAUxNiYUW5dZDweTqbJGOPRIBnsOy6zXEkmbZV0KzyZJsMhZJRa/sLtLjbsV8FkCin8jDLCZVx6YD5O8Sh6roU2LmwTBQa7y514TAZV44I3g4DvNHKpN5jR7GhekHSz0qqQ7psPS9/AnK65AJGk48jp0AcdBX7D6Hnf8cZ2Ioalbj1KHuFry62opv9eIUyxKD1Pa24QJUgzIhCFxxm5e99cMPbbxqkSSjtzz7czzmNPYOKfiX9OA/9e6LCTOSeAt2dq7UO6V+Y3quX3WGQLplH/NDdibwzSfLW2f5PWG4zHFxgvCmvrhMeHyWAwL11NTne+XeZUsQirC6cvdyfK84HBgUNt9zUQYRfDCZWs4cp5DC+FgPPETS7IrgyUazgO9hSbEiFKxOf7p1N3oQU4Pp6agTrJTBCzGa4wVmWV/3W/DxuoXdN0zdLNQv0+qjo5HrIwEGTBHIUH31+n5T5s1/Y5qVY5VdvaSib1OZOWOVXuF4RTE07FIGz+fugG7gwEiK8zzg/dCxGFCzmrBfzqUWgWGEIAX+0avjnAy0/nB9ygBXdXw91FTuarlZleUIbLvLBHWaZ1WaYtssDmStlaCeouh+hbbfQOMlBJ2tloQrk6svEVp6LjR28tE/Zf98+WB1+3PP06bH4Om79PdYwvJOqLyDFPfKwrT9ChVEkLodCaada9rOwClK+uaG6J4Gk1bCFz9b2D6xfPj7VSuWmWZU43aAulGfGbDFEF/y081f9YofGlS+X09vbQatc8su2772w8PtzT+NK1cC7YuCbYgxJNtXaqQKsgEtEUSbX9V0L5ZPfQ/gDyHDug";
-//            String decompressed = decompressString(compressed, 2626);
-//            String compressed = "eJzNVlFv2jAQ/itW9tAXwmIoBPoGVbeXrpu0SnuY+uDYBiycOIudUlTx33e2ISSBqHTTpEUiie++nL/7bN/xGpA8DxkxJLh5de+CBTcBVWk/5f1FARYOv6DnfBlJOXi/bNFsw7VKOfrkEGhWQZ55oYXKAIX7UT8CqxbZUvKw1PDpgkjNe4FUlBhAhVJka84qe6aMWGwttKhs8A4xQ8JYwbW2cQexjdzHQeXMVWGsZxINwSiJNiFnwtjIeHwdTydjjEfDyXDXs5nlKuOZqZJuwyfRNBoNozieQEbUiGdhtqHmv0qeUUjhZ5ASkYUHD8wnGB4FT7XQ2oZtosBgtrkVj2de1bAUzSDga0c+6A1mNDuaE0LXy0KVmf3mA+c0oQmY6UpIECmzHAW7dkFHnt918LTrOeN5IppTux4HHv5rI4yspv9eIXSZHDyPK6ERI6jgRCIGtxNyd+6ywfiLCamSqrDmyF0nnMeOQOzuE3efev6Rf2Arc04Ab07U2vl0L8xvVMvvoUwTXqBBOzdirjQqxHJl/iatNxiPOxgnpTF1wuP9ZDCYH1xNTrfu6uZUsfCrC6cvtyfK8YHBnkNt9zUQfhf7vV535SKEl1LCeRI6l2R7CJQXcBxMG0uJlAfE57vHtrssJDg+ts1AnaTai9kMV2qj0sr/utv5DXReU7ridJ2ol6Oq8fGQ+YEkCbcU7t3zMi13fruen5MVKmdqU1vJSX3OyZk5Ve4WRDDtT8XQb/6BfwztGfAQV2esHx7PRJY25KwW8KtDoZlnCAFctWv45gA/fDrf44ZncLc13G1gZb5YmWmHMiLLS3OUZVqXZXpGFthclK+UZLY5BN9qo3eQgUpynk1BmFBHNq7iVHTc6K1lwu7rwcny4MuWZ1CHzU9h8/epjnFHoq6IHPPEx7ryCA9EVWYgFFrxgve7lU1A+apFC0OkoNXwDJmL+w6uN54fK6Vy3SzLgq3RBkozElcpYgr+Wziq/7BC466m0u7e+9q43zUPfNPdsxfuOul/eLzv07irLZwKNq4Jdq9kU62tKtHSi0QKhjK1OaGSUJ4soks7NI4bLdil7Bl3Fd12I8Pxm52MDOIBHVx0rF36f9bK2n+2/t+eBtdvE6OyTQ==";
-//            String decompressed = decompressString(compressed, 2984);
-            String compressed = "eJy1VUtzmzAQ/isMvRrXYJfYuaVpmh6SSafOTKfTyUEG2dZESKok4tIM/727EsYY200fUx0Q2v1Y7X774DkkSkU5sSQ8f3bvLA/PQ1MQbTlbrW04cFJBCgry2yq42FAjCxq81yCnwYVSDeSJasOkAFQ8HA1HIDVMrDiNSgOfLgk3dBBymRELqIgz8UjzVi6kZcsKobqVwTvYjEiea2oM2p0lwzidDnEfz8IWoaS2qJ6OxiDkxNiI5syi+TidTOPR2ZvJZBaf1YMwk4WSggrbxnwEPsbHLIWwMsuemK0iQ7+VVGQQx9ewIExEW0340LFp0N6+GgS2UkgdFUvHWFSynXoQOrr3vwE2GrZBHFzsxAuSPa60LAV+82rpFoizNeNAkUDnWJ7EzuokfKj9ftwFQzPMw9YDBA5CyyxH4BzTH9w0+TflYqu4LI2VBfsBWeq7c+UWGqHfbZRJLjWKR24deJm6i+PEbynSqAho7QEbLor0RBSa5EzuYkh33HkHsBoWlMPZBRNcNlKpXBGy3Hh3PGfemzP3nLrnDB3zYJdcRLqa8UY/r6FsAPhEeImXbty59rY6uC+Uc7npACsvqP19HeRb1O9wC9xq708Hda0pFR3Yyp1r73EH9wlqeofScKrrkwlq+cdaqJv0HKc911LlctOpHpfJhvrm1IakkXqBLXxI/NgXQLNNDuged8O52eOwJTDeA91CL5dFB1d4Qd3c0IF+AMc6wDUe/4ygU3W5KK3tNlecNo0BJ5iYvArm1FoYj+agjy7dOt1He14AWyJSOB5dw8ChcYYo1lf6eQSTVtA9lYI2oqbkMBKZUZxUWxtKw2CzfWxGON8iPt7N7/v6UiO1r7PupNgDQACkML0x8NC/xX3eYoFkauw7N7LDOBm7NLlZ95vTzU3FF8fbvVzBD+tfZ1uSvDTOklON1a+bJNnVzXzDbLYO7sTrOzf2/7psHBf/sW6shF/qr8rm+upU1dg2AcdL5uUy8QbuoVrAnqOyESV4BuJqXD8B7bDfOw==";
-            String decompressed = decompressString(compressed, 2295);
-            return new AppModel(decompressed);
+            app = new AppModel(data);
         } catch (JSONException e) {
+            Log.e("DataUtils", "Error while loading app from stored data.", e);
             return null;
         }
+        return app;
     }
+
+    public static String getAppNameFromId(String appId, Context context) {
+        SharedPreferences sPref = context.getSharedPreferences("appNames", Context.MODE_PRIVATE);
+        Log.println(Log.ASSERT, "DataUtils", "App name: " + Arrays.toString(sPref.getAll().keySet().toArray(new String[0])));
+        Log.d("DataUtils", "App name: " + sPref.getString(appId, "nooo"));
+        return sPref.getString(appId, appId);
+    }
+
+    public static String[] getAllAppIds(Context context) {
+        SharedPreferences sPref = context.getSharedPreferences("apps", Context.MODE_PRIVATE);
+        return sPref.getAll().keySet().toArray(new String[0]);
+    }
+
+
 }
