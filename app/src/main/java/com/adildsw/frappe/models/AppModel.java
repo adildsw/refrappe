@@ -5,7 +5,9 @@ import static android.util.Log.ASSERT;
 import android.util.Log;
 
 import com.adildsw.frappe.models.components.ActivityComponent;
+import com.adildsw.frappe.models.components.ChartComponent;
 import com.adildsw.frappe.models.components.CheckboxComponent;
+import com.adildsw.frappe.models.components.DataViewerComponent;
 import com.adildsw.frappe.models.components.DropdownComponent;
 import com.adildsw.frappe.models.components.InputComponent;
 import com.adildsw.frappe.models.components.RadioComponent;
@@ -70,6 +72,12 @@ public class AppModel {
                     break;
                 case "enfrappe-ui-dropdown":
                     this.components.add(new DropdownComponent(componentData.getJSONObject(key)));
+                    break;
+                case "enfrappe-ui-dataviewer":
+                    this.components.add(new DataViewerComponent(componentData.getJSONObject(key)));
+                    break;
+                case "enfrappe-ui-chart":
+                    this.components.add(new ChartComponent(componentData.getJSONObject(key)));
                     break;
                 default:
                     Log.println(ASSERT, "App", "Unknown component type: " + type);

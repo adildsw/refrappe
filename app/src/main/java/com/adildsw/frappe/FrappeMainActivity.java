@@ -2,13 +2,11 @@ package com.adildsw.frappe;
 
 import static android.util.Log.ASSERT;
 
-import android.Manifest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.Menu;
-import android.view.View;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.adildsw.frappe.models.AppModel;
@@ -18,6 +16,7 @@ import com.adildsw.frappe.ui.QrScannerFragment;
 import com.adildsw.frappe.ui.HomeFragment;
 import com.adildsw.frappe.utils.AppMenuManager;
 import com.adildsw.frappe.utils.DataUtils;
+import com.adildsw.frappe.utils.FrappeTaskManager;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
@@ -26,12 +25,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.adildsw.frappe.databinding.ActivityFrappeMainBinding;
-
-import org.json.JSONException;
-
-import java.util.Arrays;
-
-import pub.devrel.easypermissions.EasyPermissions;
 
 public class FrappeMainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -63,33 +56,37 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
 
         navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);
-
-//        Menu menu = navigationView.getMenu();
-//        String[] appList = DataUtils.getAllAppIds(this);
-//        for (String appId : appList) {
-//            String appName = DataUtils.getAppNameFromId(appId, this);
-//            menu.add(R.id.appList, appId.hashCode(), Menu.NONE, appName);
-//            MenuItem item = menu.findItem(appId.hashCode());
-//            AppMenuManager.setMenuItemTag(item, appId);
-//            item.setOnMenuItemClickListener(menuItem -> {
-//                AppModel newApp = DataUtils
-//                        .loadApp(AppMenuManager.getMenuItemTag(menuItem), this);
-//                if (newApp != null) {
-//                    renderApp(newApp);
-//                    AppMenuManager.uncheckAllMenuItems();
-//                    item.setChecked(true);
-//                }
-//                return true;
-//            });
-//        }
+// String -> split -> decodedB64 -> decompressedZLib -> JSONObject -> AppModel
+        Menu menu = navigationView.getMenu();
+        String[] appList = DataUtils.getAllAppIds(this);
+        for (String appId : appList) {
+            String appName = DataUtils.getAppNameFromId(appId, this);
+            menu.add(R.id.appList, appId.hashCode(), Menu.NONE, appName);
+            MenuItem item = menu.findItem(appId.hashCode());
+            AppMenuManager.setMenuItemTag(item, appId);
+            item.setOnMenuItemClickListener(menuItem -> {
+                AppModel newApp = DataUtils
+                        .loadApp(AppMenuManager.getMenuItemTag(menuItem), this);
+                if (newApp != null) {
+                    renderApp(newApp);
+                    AppMenuManager.uncheckAllMenuItems();
+                    item.setChecked(true);
+                }
+                return true;
+            });
+        }
         loadHomeFragment();
     }
 
     public void renderApp(AppModel app) {
         // Measure start time
+        long startTime = System.currentTimeMillis();
         Toast.makeText(this, "Loading app...", Toast.LENGTH_SHORT).show();
         loadFragment(new AppRendererFragment(app));
+        long stopTime = System.currentTimeMillis();
         //Measure stop time
+        Log.println(ASSERT, "FrappeMainActivity", "Complete Loading time: " + (stopTime - startTime));
+        Log.println(ASSERT, "FrappeMainActivity", "Complete Loading time 2: " + (stopTime - loadTime));
     }
 
     public void renderApp(AppModel app, String activityId) {
@@ -107,22 +104,16 @@ public class FrappeMainActivity extends AppCompatActivity implements NavigationV
         return false;
     }
 
-    public boolean loadFragment(Fragment fragment) {
+    public void loadFragment(Fragment fragment) {
         if (fragment != null) {
+            FrappeTaskManager.getInstance().stopAll(); // Stops all running handlers
             toggleDrawer(false);
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragmentContainer, fragment)
                     .commitNow();
-//            Log.println(ASSERT, "CURRENT START TIME", loadTime + "");
-//            currentTime = System.currentTimeMillis();
-//            Log.println(ASSERT, "CURRENT POSTLOAD TIME", currentTime + "");
-//            long diff = currentTime - loadTime;
-//            Log.println(ASSERT, "FRAGMENT LOADED AT TIME", System.currentTimeMillis() + "");
             Log.println(ASSERT, "FRAGMENT LOADED IN", System.currentTimeMillis() - loadTime + "");
-            return true;
         }
-        return false;
     }
 
     public void toggleDrawer(boolean open) {

@@ -140,10 +140,10 @@ public class ButtonComponentInflater {
                     String key = keys.next();
                     url += key + "=" + component.getOnPressApiCustomParams().getString(key) + "&";
                 }
+                url = url.substring(0, url.length() - 1);
             } catch (Exception e) {
                 Log.e("ERROR", "performAPICall: " + e.getMessage());
             }
-            url = url.substring(0, url.length() - 1);
 
             // Making GET Call
             makeGetRequest(url, callback);
@@ -166,7 +166,6 @@ public class ButtonComponentInflater {
 
             // Making POST Call
             makePostRequest(url, params, callback);
-            Log.println(Log.ASSERT, "URL", url + "?" + params.toString());
         }
 
     }

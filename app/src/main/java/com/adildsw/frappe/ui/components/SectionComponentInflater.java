@@ -14,7 +14,9 @@ import androidx.fragment.app.FragmentActivity;
 import com.adildsw.frappe.R;
 import com.adildsw.frappe.models.AppModel;
 import com.adildsw.frappe.models.components.ButtonComponent;
+import com.adildsw.frappe.models.components.ChartComponent;
 import com.adildsw.frappe.models.components.CheckboxComponent;
+import com.adildsw.frappe.models.components.DataViewerComponent;
 import com.adildsw.frappe.models.components.DropdownComponent;
 import com.adildsw.frappe.models.components.InputComponent;
 import com.adildsw.frappe.models.components.RadioComponent;
@@ -129,6 +131,28 @@ public class SectionComponentInflater {
                         context
                 ).inflate();
                 addView(view, dropdownView);
+            }
+
+            // DataViewer Component
+            if (child.getType().equals("enfrappe-ui-dataviewer")) {
+                View textView = new DataViewerComponentInflater(
+                        app,
+                        (DataViewerComponent) child,
+                        viewGroup,
+                        context
+                ).inflate();
+                addView(view, textView);
+            }
+
+            // DataViewer Component
+            if (child.getType().equals("enfrappe-ui-chart")) {
+                View textView = new ChartComponentInflater(
+                        app,
+                        (ChartComponent) child,
+                        viewGroup,
+                        context
+                ).inflate();
+                addView(view, textView);
             }
 
             // Other sub components go here...
